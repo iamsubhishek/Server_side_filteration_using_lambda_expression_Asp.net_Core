@@ -1,0 +1,128 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!-- /.content-header -->
+<div class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="tblEmployee">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>FirstName</th>
+                                <th>LastName</th>
+                                <th>Email</th>
+                                <th>Mobile</th>
+                                <th>Department</th>
+                                <th>IsActive</th>
+                                <th>CreatedDate</th>
+                                <th>ModifiedDate</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>ID</th>
+                                <th>FirstName</th>
+                                <th>LastName</th>
+                                <th>Email</th>
+                                <th>Mobile</th>
+                                <th>Department</th>
+                                <th>IsActive</th>
+                                <th>CreatedDate</th>
+                                <th>ModifiedDate</th>
+                                <th>Action</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+
+    $(document).ready(function () {
+        debugger;
+    $("tfoot").css({ "display": "table-header-group" });
+
+        $('#tblEmployee tfoot th').each(function () {
+        var title = $(this).text();
+        $(this).html('<input type="text" class="searchTxt" placeholder="Search ' + title + '" />');
+    });
+        getEmployeeDetails();
+});
+
+function getEmployeeDetails() {
+    $("#tblEmployee").DataTable({
+        "serverSide": true, // for process server side
+        "filter": true,// this is for disable filter (search box)
+        "orderMulti": false, // for disable multiple column at once
+        processing: true,
+        'columnDefs': [{
+            'targets': [9], /* column index */
+            'orderable': false, /* true or false */
+        }],
+        //"language": {
+        //    "processing": '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+        //},
+        "ajax": {
+            "url": '@Url.Action("GetEmployeeDetails","Home")',
+            "type": "POST",
+            "datatype": "json"
+        },
+        "columns": [
+            { "data": "id" },
+            { "data": "firstName" },
+            { "data": "lastName" },
+            { "data": "emailId" },
+            { "data": "mobile" },
+            { "data": "department" },
+            { "data": "isActive" },
+            { "data": "createdDate" },
+            { "data": "modifiedDate" },
+             {
+                "render": function (data, type, full, meta) {
+                    var detail = $('#hdnDetail').val();
+                    return '<a href=' + detail + "?id=" + full.idVteuv + ' asp-route-id="' + full.idVteuv + '" >Details</a>';
+                },
+            }
+        ],
+        initComplete: function () {
+            // Apply the search
+            this.api().columns().every(function () {
+                var that = this;
+
+                $('input', this.footer()).focusout(function () {
+                    if (that.search() !== this.value) {
+                        that
+                            .search(this.value)
+                            .draw();
+                    }
+                });
+
+
+                $('input', this.footer()).keypress(function (e) {
+                    if (e.which == 13)  // the enter key code
+                    {
+                        if (that.search() !== this.value) {
+                            that
+                                .search(this.value)
+                                .draw();
+                        }
+                    }
+                });
+            });
+        }
+    });
+};
+    </script>
+    }
